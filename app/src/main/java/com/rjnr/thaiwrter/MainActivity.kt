@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rjnr.thaiwrter.ui.navigation.NavDestinations
 import com.rjnr.thaiwrter.ui.screens.CharacterPracticeScreen
 import com.rjnr.thaiwrter.ui.screens.MainScreen
+import com.rjnr.thaiwrter.ui.screens.ProgressScreen
 import com.rjnr.thaiwrter.ui.theme.ThaiWrterTheme
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
                             CharacterPracticeScreen(navController = navController)
                         }
                         composable(NavDestinations.PROGRESS) {
-                            //  ProgressScreen(navController = navController)
+                            ProgressScreen(navController = navController)
                         }
                     }
                 }

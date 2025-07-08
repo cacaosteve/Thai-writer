@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rjnr.thaiwrter.data.models.THAI_CHARACTERS
 import com.rjnr.thaiwrter.data.models.ThaiCharacter
 import com.rjnr.thaiwrter.data.repository.ThaiLanguageRepository
 import com.rjnr.thaiwrter.utils.MLStrokeValidator
@@ -38,13 +39,7 @@ class CharacterPracticeViewModel(
     private val mlStrokeValidator: MLStrokeValidator
 ) : ViewModel() {
     // ...
-    private val allCharacters = MLStrokeValidator.CHARACTER_MAP.map { (index, char) ->
-        ThaiCharacter(
-            id = index,
-            character = char,
-            pronunciation = MLStrokeValidator.getPronunciation(index)
-        )
-    }
+    private val allCharacters = THAI_CHARACTERS
     private val _currentCharacter = MutableStateFlow<ThaiCharacter?>(null)
     val currentCharacter = _currentCharacter.asStateFlow()
 

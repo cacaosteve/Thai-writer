@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.rjnr.thaiwrter.ui.drawing.DrawingCanvas
 import com.rjnr.thaiwrter.ui.drawing.DrawingConfig
 import com.rjnr.thaiwrter.ui.drawing.OptimizedDrawingCanvas
 import com.rjnr.thaiwrter.ui.drawing.StrokeGuide
@@ -299,7 +298,7 @@ fun CharacterPracticeScreen(
                         RoundedCornerShape(8.dp)
                     ) // Theme color
             ) {
-                // Grid lines (like in the video - simplified)
+                // Grid lines
                 Canvas(Modifier.fillMaxSize()) {
                     val thirdHeight = size.height / 3
                     val thirdWidth = size.width / 3
@@ -348,13 +347,15 @@ fun CharacterPracticeScreen(
 //                    )
 //                }
                 if (practiceStep == PracticeStep.GUIDE_AND_TRACE && currentCharacter != null) {
-                    StrokeGuide(
-                        svgPathData = currentCharacter?.svgPathData,
-                        animationProgress = guideAnimationProgress,
-                        userHasStartedTracing = userHasStartedTracing,
-                        marginToApply = 0.2f, // Reduced margin inside the already padded canvas box
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    currentCharacter?.let { char ->
+                        StrokeGuide(
+                            strokes = char.strokes,
+                            animationProgress = guideAnimationProgress,
+                            userHasStartedTracing = userHasStartedTracing,
+                            marginToApply = 0.2f,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 // User Drawing Canvas
@@ -373,23 +374,25 @@ fun CharacterPracticeScreen(
                 if ((practiceStep == PracticeStep.MORPHING_TRACE_TO_CORRECT || practiceStep == PracticeStep.MORPHING_WRITE_TO_CORRECT) && userDrawnPath != null) {
                     MorphOverlay(
                         userPath = userDrawnPath!!,
-                        perfectSvgData = currentCharacter?.svgPathData,
+                        perfectStrokes = currentCharacter?.strokes ?: listOf(),
                         onFinished = viewModel::onMorphAnimationFinished,
                         marginToApply = 0.2f, // Consistent margin
                         modifier = Modifier.fillMaxSize()
                     )
-                } else if ((practiceStep == PracticeStep.AWAITING_BLANK_SLATE || practiceStep == PracticeStep.AWAITING_NEXT_CHARACTER) && currentCharacter?.svgPathData != null) {
+                } else if ((practiceStep == PracticeStep.AWAITING_BLANK_SLATE || practiceStep == PracticeStep.AWAITING_NEXT_CHARACTER) && currentCharacter?.strokes != null) {
                     // Re-use StrokeGuide to draw the static perfect character in green
-                    StrokeGuide(
-                        svgPathData = currentCharacter?.svgPathData,
-                        animationProgress = 1f, // Fully drawn
-                        userHasStartedTracing = true, // Treat as if user interacted for static display
-                        staticGuideColor = Color.Green.copy(alpha = 0.0f), // Make underlying static guide invisible
-                        animatedSegmentColor = Color.Green, // This will be the color used for the "segment"
-                        finalStaticSegmentColor = Color.Green, // Ensure it's green
-                        marginToApply = 0.2f,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    currentCharacter?.let { char ->
+                        StrokeGuide(
+                            strokes = char.strokes,
+                            animationProgress = 1f, // Fully drawn
+                            userHasStartedTracing = true, // Treat as if user interacted for static display
+                            staticGuideColor = Color.Green.copy(alpha = 0.0f), // Make underlying static guide invisible
+                            animatedSegmentColor = Color.Green, // This will be the color used for the "segment"
+                            finalStaticSegmentColor = Color.Green, // Ensure it's green
+                            marginToApply = 0.2f,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
 

@@ -10,7 +10,7 @@ fun ThaiCharacterEntity.toDomain(): ThaiCharacter {
         id = id,
         character = character,
         pronunciation = pronunciation,
-        svgPathData = strokeData,
+        strokes = emptyList(),
         difficulty = difficulty,
         category = category
     )
@@ -21,7 +21,7 @@ fun ThaiCharacter.toEntity(): ThaiCharacterEntity {
         id = id,
         character = character,
         pronunciation = pronunciation,
-        strokeData = Json.encodeToString(svgPathData),
+        strokeData = "",
         difficulty = difficulty,
         category = category
     )

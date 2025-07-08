@@ -9,15 +9,18 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
+import androidx.core.graphics.get
+import androidx.core.graphics.scale
 import com.rjnr.thaiwrter.data.models.Point
+import com.rjnr.thaiwrter.data.models.THAI_CHARACTERS
+import com.rjnr.thaiwrter.data.models.ThaiCharacter
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
 import java.util.concurrent.locks.ReentrantLock
-import androidx.core.graphics.scale
-import androidx.core.graphics.get
+import androidx.core.graphics.createBitmap
 
 data class CharacterPrediction(
     val characterIndex: Int,
@@ -101,7 +104,7 @@ class MLStrokeValidator(private val context: Context) {
     private fun convertToGrayscale(bitmap: Bitmap): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
-        val grayscaleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val grayscaleBitmap = createBitmap(width, height)
         val canvas = Canvas(grayscaleBitmap)
 
         val paint = Paint().apply {
@@ -112,8 +115,10 @@ class MLStrokeValidator(private val context: Context) {
 
         canvas.drawBitmap(bitmap, 0f, 0f, paint)
         return grayscaleBitmap
-    }    private fun convertStrokeToBitmap(points: List<Point>, width: Float, height: Float): Bitmap {
-        val bitmap = Bitmap.createBitmap(imageSize, imageSize, Bitmap.Config.ARGB_8888)
+    }
+
+    private fun convertStrokeToBitmap(points: List<Point>, width: Float, height: Float): Bitmap {
+        val bitmap = createBitmap(imageSize, imageSize)
         val canvas = Canvas(bitmap)
 
         // Set white background
@@ -210,50 +215,17 @@ class MLStrokeValidator(private val context: Context) {
         )
     }
 
-    // MLStrokeValidator.kt
     companion object {
+        fun getCharacterFromIndex(index: Int): String =
+            THAI_CHARACTERS.getOrNull(index)?.character ?: "?"
 
-        val CHARACTER_MAP = mapOf(
-            0 to "ก", 1 to "ข", 2 to "ฃ", 3 to "ค", 4 to "ฅ", 5 to "ฆ", 6 to "ง",
-            7 to "จ", 8 to "ฉ", 9 to "ช", 10 to "ซ", 11 to "ฌ", 12 to "ญ", 13 to "ฎ",
-            14 to "ฏ", 15 to "ฐ", 16 to "ฑ", 17 to "ฒ", 18 to "ณ", 19 to "ด", 20 to "ต",
-            21 to "ถ", 22 to "ท", 23 to "ธ", 24 to "น", 25 to "บ", 26 to "ป", 27 to "ผ",
-            28 to "ฝ", 29 to "พ", 30 to "ฟ", 31 to "ภ", 32 to "ม", 33 to "ย", 34 to "ร",
-            35 to "ฤ", 36 to "ล", 37 to "ว", 38 to "ศ", 39 to "ษ", 40 to "ส", 41 to "ห",
-            42 to "ฬ", 43 to "อ", 44 to "อะ", 45 to "อา", 46 to "อำ", 47 to "ฮ", 48 to "ฯ",
-            49 to "เ", 50 to "แ", 51 to "โ", 52 to "ใ", 53 to "ไ", 54 to "ๆ"
-        )
+        fun getPronunciation(index: Int): String =
+            THAI_CHARACTERS.getOrNull(index)?.pronunciation ?: "?"
 
-        fun getCharacterFromIndex(index: Int): String = CHARACTER_MAP[index] ?: "?"
+        val ALL_CHARS: List<Pair<String, String>> =
+            THAI_CHARACTERS.map { it.character to it.pronunciation }
 
-        fun getPronunciation(index: Int): String = when(index) {
-            0 -> "ko kai"      1 -> "kho khai"    2 -> "kho khuat"    3 -> "kho khwai"
-            4 -> "kho khon"     5 -> "kho rakhang"  6 -> "ngo ngu"     7 -> "cho chan"
-            8 -> "cho ching"    9 -> "cho chang"    10 -> "so so"       11 -> "cho choe"
-            12 -> "yo ying"     13 -> "do chada"    14 -> "to patak"    15 -> "tho than"
-            16 -> "tho montho"  17 -> "tho phuthao" 18 -> "no nen"     19 -> "do dek"
-            20 -> "to tao"      21 -> "tho thung"  22 -> "tho thahan" 23 -> "tho thong"
-            24 -> "no nu"       25 -> "bo baimai"   26 -> "po pla"     27 -> "pho phueng"
-            28 -> "fo fa"       29 -> "pho phan"   30 -> "fo fan"      31 -> "pho samphao"
-            32 -> "mo ma"       33 -> "yo yak"      34 -> "ro ruea"     35 -> "ru"
-            36 -> "lo ling"     37 -> "wo waen"     38 -> "so sala"     39 -> "so ruesi"
-            40 -> "so suea"     41 -> "ho hip"      42 -> "lo chula"    43 -> "o ang"
-            44 -> "sara a"      45 -> "sara aa"     46 -> "sara am"     47 -> "ho nokhuk"
-            48 -> "paiyannoi"   49 -> "sara e"      50 -> "sara ae"    51 -> "sara o"
-            52 -> "sara ai mai muan" 53 -> "sara ai mai malai" 54 -> "mai yamok"
-            else -> ""
-        }
-
-        fun getAllCharacters(): List<Pair<String, String>> {
-            return CHARACTER_MAP.map { (index, char) ->
-                char to getPronunciation(index)
-            }
-        }
-
-        fun getRandomCharacter(): Pair<String, String> {
-            val randomIndex = CHARACTER_MAP.keys.random()
-            return CHARACTER_MAP[randomIndex]!! to getPronunciation(randomIndex)
-        }
+        fun randomCharacter(): ThaiCharacter = THAI_CHARACTERS.random()
     }
 }
 
